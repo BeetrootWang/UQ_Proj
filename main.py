@@ -139,6 +139,6 @@ if __name__ == '__main__':
 
     f = open(f'Result.txt','a')
     f.write('----->\n')
-    f.write(f'\tCov Rate (%) \t d: {d} \t n: {n} \t R: {R} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
-    f.write(f'\tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)}) \t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)})\n')
+    f.write(f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)}) \n')
+    f.write(f'\td: {d} \t n: {n} \t R: {R} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
     f.close()
