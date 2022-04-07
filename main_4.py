@@ -100,7 +100,7 @@ if __name__ == '__main__':
     alpha = 0.501  # step size eta_i = eta * i^{-alpha}
     x_star = np.linspace(0, 1, d)  # optimal solution
     x_0 = np.zeros(d)  # initial guess
-    R = 10 # number of bootstrap
+    R = 50 # number of bootstrap
     num_trials = 100
 
     # mean and variance for generating a_i
