@@ -12,14 +12,16 @@ def F_LR(x, cov_a, x_star, var_epsilon):
 # rng: random generator
 # x_prev: initial guess
 # n: number of iterations
-def run_SGD_LR_O(rng, x_prev, n):
+def run_SGD_LR_O(rng, x_star, x_prev, n):
+    d = len(x_prev)
     x_history = []
-    a_n_history = []
+    a_n_history = rng.normal(0, 1, (n,d))
+    epsilon_n_history = rng.normal(0,var_epsilon,n)
     b_n_history = []
     for iter_num in range(n):
         # sample data
-        a_n = rng.multivariate_normal(mean_a, cov_a)
-        epsilon_n = rng.normal(0, var_epsilon)
+        a_n = a_n_history[iter_num,:]
+        epsilon_n = epsilon_n_history[iter_num]
         b_n = a_n @ x_star + epsilon_n
         # update learning rate
         eta_n = eta * (1 + iter_num) ** (-alpha)
@@ -28,25 +30,25 @@ def run_SGD_LR_O(rng, x_prev, n):
         x_prev = x_n
         # recording
         x_history.append(x_n)
-        a_n_history.append(a_n)
         b_n_history.append(b_n)
         # output every 1000 iter
-        if iter_num % 1000 == 999:
+        if iter_num % int(n/10) == int(n/10-1):
             print(f'Iter \t[{iter_num + 1}/{n}]\t\t finished')
     x_out = np.mean(x_history, axis=0)
     return x_out, a_n_history, b_n_history
 
 # SGD bootstrap loop
 # compute bootstrap confidence interval
-def bootstrap_CI(x_0, n, R, a_n_history, b_n_history, seed_list=np.arange(1,100)):
+def bootstrap_CI(x_0, n, R, a_n_history, b_n_history):
     bootstrap_output_history = []
+    rng_b = np.random.default_rng(1)  # random generator for bootstrap experiment
+    bootstrap_samples_all = rng_b.integers(0, n, (R,n))  # bootstrap_samples[i] is the index of data for i-th iteration
     for r in range(1, R + 1):
-        rng_b = np.random.default_rng(seed_list[r])  # random generator for bootstrap experiment
-        bootstrap_samples = rng_b.integers(0, n, n)  # bootstrap_samples[i] is the index of data for i-th iteration
         # which is selected uniformly from given data
         # SGD on bootstrap samples
         x_prev = x_0
         x_history = []
+        bootstrap_samples = bootstrap_samples_all[r-1,:]
         for iter_num in range(n):
             # sample bootstrap data
             a_n = a_n_history[bootstrap_samples[iter_num]]
@@ -59,7 +61,7 @@ def bootstrap_CI(x_0, n, R, a_n_history, b_n_history, seed_list=np.arange(1,100)
             # recording
             x_history.append(x_n)
             # output every 1000 iter
-            if iter_num % 1000 == 999:
+            if iter_num % int(n/10) == int(n/10-1):
                 print(f'R: \t[{r}/{R}]\t Iter \t[{iter_num + 1}/{n}]\t\t finished')
         bootstrap_output_history.append(np.mean(x_history, axis=0))
 
@@ -85,8 +87,6 @@ def bootstrap_CI(x_0, n, R, a_n_history, b_n_history, seed_list=np.arange(1,100)
 
 
 if __name__ == '__main__':
-    # set random seed for original samples
-    rng = np.random.default_rng(1)
 
     # basic setting
     var_epsilon = 1  # variance for noise in linear regression
@@ -96,7 +96,8 @@ if __name__ == '__main__':
     alpha = 0.501  # step size eta_i = eta * i^{-alpha}
     x_star = np.linspace(0, 1, d)  # optimal solution
     x_0 = np.zeros(d)  # initial guess
-    R = 1 # number of bootstrap
+    R = 3 # number of bootstrap
+    num_trials = 100
 
     # mean and variance for generating a_i
     # identity covariance matrix case
@@ -108,10 +109,25 @@ if __name__ == '__main__':
     Asy_cov = np.eye(d)  # asymptotic covariance matrix
 
     # SGD origial loop
-    x_out, a_n_history, b_n_history = run_SGD_LR_O(rng, x_0, n)
-    x_r, CI_radius = bootstrap_CI(x_0, n, R, a_n_history, b_n_history)
+    # set random seed for original samples
+    mean_len_history = []
+    std_len_history = []
+    cov_history = []
+    for seed in range(num_trials):
+        rng = np.random.default_rng(seed)
+        x_out, a_n_history, b_n_history = run_SGD_LR_O(rng, x_star, x_0, n)
+        x_r, CI_radius = bootstrap_CI(x_out, n, R, a_n_history, b_n_history)
 
-    # debug code
-    print('*'*20)
-    print(CI_radius)
+        mean_Len = np.mean(CI_radius*2)
+        std_Len = np.std(CI_radius*2)
+        mean_len_history.append(mean_Len)
+        std_len_history.append(std_Len)
+        cover = [1 if abs(x_out[ii]-x_r[ii])<= CI_radius[ii] else 0 for ii in range(len(x_out))]
+        cov_history.append(cover)
+
+    for seed in range(num_trials):
+        # debug code
+        print('*'*20)
+        print(f'Len: {mean_len_history[seed]} ({std_len_history[seed]})')
+    print(np.mean(cov_history))
     # import pdb; pdb.set_trace()
