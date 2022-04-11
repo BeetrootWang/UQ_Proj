@@ -82,14 +82,6 @@ def bootstrap_CI(x_0, n, R, a_n_history, b_n_history):
     # x_r = np.linalg.solve(A, b)
 
     # Compute Radius of CI
-    # # TODO: Modify this part
-    # Z = norm.ppf(0.975)
-    # d = len(x_r)
-    # CI_radius = []
-    # for ii in range(d):
-    #     sigma_hat = np.sqrt(np.sum(np.array(bootstrap_output_history)[:, ii] - x_r[ii]) ** 2 / R)
-    #     radius_d = Z * sigma_hat
-    #     CI_radius.append(radius_d)
     t_val = t.ppf(0.975, R - 1)
     d = np.size(np.array(b_n_history[-1]))
     CI_radius = []
