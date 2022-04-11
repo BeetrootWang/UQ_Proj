@@ -14,7 +14,7 @@ def F_LR(x, cov_a, x_star, var_epsilon):
 # rng: random generator
 # x_prev: initial guess
 # n: number of iterations
-def run_SGD_LR_O(seed, x_star, x_prev, n):
+def run_SGD_LR_O(seed, x_star, x_prev, n, eta, var_epsilon=1, alpha=0.501):
     rng = np.random.default_rng(seed)
     d = len(x_prev)
     x_history = []
@@ -39,6 +39,7 @@ def run_SGD_LR_O(seed, x_star, x_prev, n):
         # if iter_num % int(n/10) == int(n/10-1):
         #     print(f'Seed: \t [{seed}/100]\t Iter \t[{iter_num + 1}/{n}]\t\t finished')
     x_out = np.mean(x_history, axis=0)
+    # print(x_out)
     return x_out, a_n_history, b_n_history
 
 
@@ -49,8 +50,6 @@ def bootstrap_CI(x_0, n, R, a_n_history, b_n_history):
     rng_b = np.random.default_rng(1)  # random generator for bootstrap experiment
     bootstrap_samples_all = rng_b.integers(0, n, (R, n))  # bootstrap_samples[i] is the index of data for i-th iteration
     for r in range(1, R + 1):
-        if r % 5 == 0:
-            print(f'---> bootstrap [{r}/{R}] Done')
         # which is selected uniformly from given data
         # SGD on bootstrap samples
         x_prev = x_0
@@ -72,6 +71,10 @@ def bootstrap_CI(x_0, n, R, a_n_history, b_n_history):
             #     print(f'R: \t[{r}/{R}]\t Iter \t[{iter_num + 1}/{n}]\t\t finished')
         bootstrap_output_history.append(np.mean(x_history, axis=0))
 
+        if r % 5 == 0:
+            print(f'---> bootstrap [{r}/{R}] Done')
+            # print(np.mean(x_history, axis=0))
+
     # # bootstrap true solution
     # # x_r is the optimal solution for the bootstrap problem
     # # which is obtainable
@@ -82,8 +85,8 @@ def bootstrap_CI(x_0, n, R, a_n_history, b_n_history):
     # x_r = np.linalg.solve(A, b)
 
     # Compute Radius of CI
-    t_val = t.ppf(0.975, R - 1)
-    d = np.size(np.array(b_n_history[-1]))
+    t_val = t.ppf(0.975, R-1)
+    d = np.shape(a_n_history)[1]
     CI_radius = []
     bar_X = []
     for ii in range(d):
@@ -113,7 +116,7 @@ def main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials):
     len_history = []
     cov_history = []
     for seed in range(1, 1 + num_trials):
-        x_out, a_n_history, b_n_history = run_SGD_LR_O(seed, x_star, x_0, n)
+        x_out, a_n_history, b_n_history = run_SGD_LR_O(seed, x_star, x_0, n, eta)
         x_r, CI_radius = bootstrap_CI(x_out, n, R, a_n_history, b_n_history)
 
         mean_Len = np.mean(CI_radius * 2)
@@ -127,7 +130,7 @@ def main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials):
     for seed in range(1, 1 + num_trials):
         # debug code
         print('*' * 20)
-        print(f'Len: {mean_len_history[seed - 1]} ({std_len_history[seed - 1]})')
+        print(f'Len: {mean_len_history[seed - 1]:.6f} ({std_len_history[seed - 1]:.6f})')
     print(np.mean(cov_history))
     # import pdb; pdb.set_trace()
 
@@ -138,19 +141,22 @@ def main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials):
     f.write(f'\td: {d} \t n: {n} \t R: {R} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
     f.close()
 
+    return
+
 
 if __name__ == '__main__':
     # basic setting
     var_epsilon = 1  # variance for noise in linear regression
     d = 1  # d = 5,20,100,200
-    n = int(1e4)  # sample size
-    eta = 5e-1
+    n = int(1e5)  # sample size
+    eta = 1e-2
     alpha = 0.501  # step size eta_i = eta * i^{-alpha}
     x_star = np.linspace(0, 1, d)  # optimal solution
     x_0 = np.zeros(d)  # initial guess
     R = 2  # number of bootstrap
     num_trials = 100
 
-    main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials)
+    for R in [2,5,10]:
+        main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials)
 
     # TODO: t-distribution; d=1; sensitivity (eta, X_0, alpha);
