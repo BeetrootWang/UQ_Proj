@@ -1,6 +1,6 @@
 # import packages
 import numpy as np
-from scipy.stats import norm
+from scipy.stats import t
 
 
 # F for linear regression
@@ -72,26 +72,36 @@ def bootstrap_CI(x_0, n, R, a_n_history, b_n_history):
             #     print(f'R: \t[{r}/{R}]\t Iter \t[{iter_num + 1}/{n}]\t\t finished')
         bootstrap_output_history.append(np.mean(x_history, axis=0))
 
-    # bootstrap true solution
-    # x_r is the optimal solution for the bootstrap problem
-    # which is obtainable
-    # It can be computed by
-    # x_r = inv(sum a_i a_i^T) * sum b_i a_i
-    A = np.array(a_n_history[:n]).T @ np.array(a_n_history[:n])
-    b = np.array(a_n_history[:n]).T @ b_n_history[:n]
-    x_r = np.linalg.solve(A, b)
+    # # bootstrap true solution
+    # # x_r is the optimal solution for the bootstrap problem
+    # # which is obtainable
+    # # It can be computed by
+    # # x_r = inv(sum a_i a_i^T) * sum b_i a_i
+    # A = np.array(a_n_history[:n]).T @ np.array(a_n_history[:n])
+    # b = np.array(a_n_history[:n]).T @ b_n_history[:n]
+    # x_r = np.linalg.solve(A, b)
 
     # Compute Radius of CI
-    # TODO: Modify this part
-    Z = norm.ppf(0.975)
-    d = len(x_r)
+    # # TODO: Modify this part
+    # Z = norm.ppf(0.975)
+    # d = len(x_r)
+    # CI_radius = []
+    # for ii in range(d):
+    #     sigma_hat = np.sqrt(np.sum(np.array(bootstrap_output_history)[:, ii] - x_r[ii]) ** 2 / R)
+    #     radius_d = Z * sigma_hat
+    #     CI_radius.append(radius_d)
+    t_val = t.ppf(0.975, R - 1)
+    d = np.size(np.array(b_n_history[-1]))
     CI_radius = []
+    bar_X = []
     for ii in range(d):
-        sigma_hat = np.sqrt(np.sum(np.array(bootstrap_output_history)[:, ii] - x_r[ii]) ** 2 / R)
-        radius_d = Z * sigma_hat
+        bar_X_ii = np.mean(np.array(bootstrap_output_history)[:, ii])
+        bar_X.append(bar_X_ii)
+        sigma_hat = np.sqrt(np.sum( (np.array(bootstrap_output_history)[:, ii] - bar_X_ii)**2 / (R - 1) ) )
+        radius_d = t_val * sigma_hat / np.sqrt(R)
         CI_radius.append(radius_d)
-
-    return x_r, CI_radius
+    # import pdb; pdb.set_trace()
+    return bar_X, CI_radius
 
 
 def main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials):
@@ -140,13 +150,13 @@ def main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials):
 if __name__ == '__main__':
     # basic setting
     var_epsilon = 1  # variance for noise in linear regression
-    d = 5  # d = 5,20,100,200
-    n = int(1e3)  # sample size
+    d = 1  # d = 5,20,100,200
+    n = int(1e4)  # sample size
     eta = 5e-1
     alpha = 0.501  # step size eta_i = eta * i^{-alpha}
     x_star = np.linspace(0, 1, d)  # optimal solution
     x_0 = np.zeros(d)  # initial guess
-    R = 10  # number of bootstrap
+    R = 2  # number of bootstrap
     num_trials = 100
 
     main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials)
