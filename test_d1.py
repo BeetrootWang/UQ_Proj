@@ -13,4 +13,4 @@ if __name__ == '__main__':
     R = 2  # number of bootstrap
     num_trials = 500
 
-    main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials)
+    main_experiments(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials)

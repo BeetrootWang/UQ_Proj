@@ -14,14 +14,13 @@ def F_LR(x, cov_a, x_star, var_epsilon):
 # rng: random generator
 # x_prev: initial guess
 # n: number of iterations
-def run_SGD_LR_O(seed, x_star, x_prev, n, eta, var_epsilon=1, alpha=0.501):
+def run_SGD_LR_O(seed, x_star, x_prev, n, eta, var_epsilon, alpha):
     rng = np.random.default_rng(seed)
     d = len(x_prev)
     x_history = []
     a_n_history = rng.normal(0, 1, (n, d))
     epsilon_n_history = rng.normal(0, var_epsilon, n)
     b_n_history = []
-    print(f'Seed: [{seed}/100] ...')
     for iter_num in range(n):
         # sample data
         a_n = a_n_history[iter_num, :]
@@ -45,7 +44,7 @@ def run_SGD_LR_O(seed, x_star, x_prev, n, eta, var_epsilon=1, alpha=0.501):
 
 # SGD bootstrap loop
 # compute bootstrap confidence interval
-def bootstrap_CI(x_0, n, R, a_n_history, b_n_history):
+def bootstrap_CI(x_0, n, R, a_n_history, b_n_history, eta, alpha):
     bootstrap_output_history = []
     rng_b = np.random.default_rng(1)  # random generator for bootstrap experiment
     bootstrap_samples_all = rng_b.integers(0, n, (R, n))  # bootstrap_samples[i] is the index of data for i-th iteration
@@ -99,7 +98,7 @@ def bootstrap_CI(x_0, n, R, a_n_history, b_n_history):
     return bar_X, CI_radius
 
 
-def main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials):
+def main_experiments(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials):
     # mean and variance for generating a_i
     # identity covariance matrix case
     #
@@ -116,8 +115,9 @@ def main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials):
     len_history = []
     cov_history = []
     for seed in range(1, 1 + num_trials):
-        x_out, a_n_history, b_n_history = run_SGD_LR_O(seed, x_star, x_0, n, eta)
-        x_r, CI_radius = bootstrap_CI(x_out, n, R, a_n_history, b_n_history)
+        print(f'Seed: [{seed}/{num_trials}] ...')
+        x_out, a_n_history, b_n_history = run_SGD_LR_O(seed, x_star, x_0, n, eta, var_epsilon, alpha)
+        x_r, CI_radius = bootstrap_CI(x_out, n, R, a_n_history, b_n_history, eta, alpha)
 
         mean_Len = np.mean(CI_radius * 2)
         std_Len = np.std(CI_radius * 2)
@@ -157,6 +157,6 @@ if __name__ == '__main__':
     num_trials = 100
 
     for R in [2,5,10]:
-        main_experiments(d, n, eta, alpha, x_star, x_0, R, num_trials)
+        main_experiments(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials)
 
     # TODO: t-distribution; d=1; sensitivity (eta, X_0, alpha);
