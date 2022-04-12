@@ -192,6 +192,10 @@ def main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num
     f.write(
         f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)}) \n')
     f.write(f'\t d: {d} \t n: {n} \t R: {R} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
+    f.write(f'\t True solution:           [')
+    for ii in range(d):
+        f.write(f'{x_star[ii]:.6f}, ')
+    f.write(']\n')
     f.write(f'\t center in last trial:    [')
     for ii in range(d):
         f.write(f'{x_out_history[-1][ii]:.6f}, ')

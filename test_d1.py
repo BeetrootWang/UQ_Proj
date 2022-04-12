@@ -11,7 +11,7 @@ if __name__ == '__main__':
     # R = 2  # number of bootstrap
     num_trials = 100
 
-    for R in [2,5,20]:
+    for R in [50]:
         for d in [1,5,20,200]:
             x_star = np.linspace(0, 1, d)  # optimal solution
             x_0 = np.zeros(d)  # initial guess
