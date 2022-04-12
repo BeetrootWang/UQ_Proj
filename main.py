@@ -1,7 +1,7 @@
 # import packages
 import numpy as np
 from scipy.stats import t
-
+from joblib import Parallel, delayed
 
 # F for linear regression
 #   F(x) = \mathbb{E} [1/2 (a^T x - b)^2]
@@ -84,18 +84,17 @@ def bootstrap_CI(x_0, n, R, a_n_history, b_n_history, eta, alpha):
     # x_r = np.linalg.solve(A, b)
 
     # Compute Radius of CI
+    # TODO: Make sure that this part is correct
     t_val = t.ppf(0.975, R-1)
     d = np.shape(a_n_history)[1]
     CI_radius = []
-    bar_X = []
     for ii in range(d):
         bar_X_ii = np.mean(np.array(bootstrap_output_history)[:, ii])
-        bar_X.append(bar_X_ii)
         sigma_hat = np.sqrt(np.sum( (np.array(bootstrap_output_history)[:, ii] - bar_X_ii)**2 / (R - 1) ) )
-        radius_d = t_val * sigma_hat / np.sqrt(R)
+        radius_d = t_val * sigma_hat
         CI_radius.append(radius_d)
-    # import pdb; pdb.set_trace()
-    return bar_X, CI_radius
+    CI_radius = np.array(CI_radius)
+    return CI_radius
 
 
 def main_experiments(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials):
@@ -110,22 +109,23 @@ def main_experiments(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials):
 
     # SGD origial loop
     # set random seed for original samples
-    mean_len_history = []
-    std_len_history = []
-    len_history = []
-    cov_history = []
+    mean_len_history = np.zeros(num_trials)
+    std_len_history = np.zeros(num_trials)
+    len_history = np.zeros([num_trials,d])
+    cov_history = np.zeros([num_trials,d])
     for seed in range(1, 1 + num_trials):
         print(f'Seed: [{seed}/{num_trials}] ...')
         x_out, a_n_history, b_n_history = run_SGD_LR_O(seed, x_star, x_0, n, eta, var_epsilon, alpha)
-        x_r, CI_radius = bootstrap_CI(x_out, n, R, a_n_history, b_n_history, eta, alpha)
+        CI_radius = bootstrap_CI(x_out, n, R, a_n_history, b_n_history, eta, alpha)
 
         mean_Len = np.mean(CI_radius * 2)
         std_Len = np.std(CI_radius * 2)
-        len_history.append(CI_radius * 2)
-        mean_len_history.append(mean_Len)
-        std_len_history.append(std_Len)
-        cover = [1 if abs(x_out[ii] - x_r[ii]) <= CI_radius[ii] else 0 for ii in range(len(x_out))]
-        cov_history.append(cover)
+        # import pdb; pdb.set_trace()
+        len_history[seed-1,:] = CI_radius*2
+        mean_len_history[seed-1] = mean_Len
+        std_len_history[seed-1] = std_Len
+        cover = [1 if abs(x_out[ii] - x_star[ii]) <= CI_radius[ii] else 0 for ii in range(len(x_out))]
+        cov_history[seed-1,:] = cover
 
     for seed in range(1, 1 + num_trials):
         # debug code
@@ -143,6 +143,76 @@ def main_experiments(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials):
 
     return
 
+def main_loop(seed, x_star, x_0, n, R, eta, var_epsilon, alpha, num_trials):
+    print(f'Seed: [{seed}/{num_trials}] ...')
+    x_out, a_n_history, b_n_history = run_SGD_LR_O(seed, x_star, x_0, n, eta, var_epsilon, alpha)
+    CI_radius = bootstrap_CI(x_0, n, R, a_n_history, b_n_history, eta, alpha)
+
+    mean_Len = np.mean(CI_radius * 2)
+    std_Len = np.std(CI_radius * 2)
+    cover = [1 if abs(x_out[ii] - x_star[ii]) <= CI_radius[ii] else 0 for ii in range(len(x_out))]
+
+    return mean_Len, std_Len, cover, CI_radius*2, x_out
+
+def main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials):
+    # mean and variance for generating a_i
+    # identity covariance matrix case
+    #
+    # linear regression model:
+    # b_i = x_star^\top a_i + \epsilon_i
+    mean_a = np.zeros(d)
+    cov_a = np.eye(d)
+    Asy_cov = np.eye(d)  # asymptotic covariance matrix
+
+    # SGD origial loop
+    # set random seed for original samples
+    results = Parallel(n_jobs=32)(delayed(main_loop)(seed, x_star, x_0, n, R, eta, var_epsilon, alpha, num_trials) for seed in range(1, 1+num_trials))
+    mean_len_history = []
+    std_len_history = []
+    len_history = []
+    cov_history = []
+    x_out_history = []
+    for ii in range(num_trials):
+        mean_len_history.append(results[ii][0])
+        std_len_history.append(results[ii][1])
+        cov_history.append(results[ii][2])
+        len_history.append(results[ii][3])
+        x_out_history.append(results[ii][4])
+
+
+    for seed in range(1, 1 + num_trials):
+        # debug code
+        print('*' * 20)
+        print(f'Len: {mean_len_history[seed - 1]:.6f} ({std_len_history[seed - 1]:.10f})')
+    print(np.mean(cov_history))
+    # import pdb; pdb.set_trace()
+
+    f = open(f'Result_{d}.txt', 'a')
+    f.write('----->\n')
+    f.write(
+        f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)}) \n')
+    f.write(f'\t d: {d} \t n: {n} \t R: {R} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
+    f.write(f'\t center in last trial:    [')
+    for ii in range(d):
+        f.write(f'{x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI UB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI LB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{-len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    # f.write(f'\t Cover in the last trial: [')
+    # for ii in range(d):
+    #     f.write(f'{(cov_history)[-1][ii]:.0f}       , ')
+    # f.write(']\n')
+
+    f.close()
+
+    return
+
 
 if __name__ == '__main__':
     # basic setting
@@ -154,9 +224,10 @@ if __name__ == '__main__':
     x_star = np.linspace(0, 1, d)  # optimal solution
     x_0 = np.zeros(d)  # initial guess
     R = 2  # number of bootstrap
-    num_trials = 100
+    num_trials = 500
 
     for R in [2,5,10]:
-        main_experiments(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials)
+        # main_experiments(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials)
+        main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials)
 
     # TODO: t-distribution; d=1; sensitivity (eta, X_0, alpha);
