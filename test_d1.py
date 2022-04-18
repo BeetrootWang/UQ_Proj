@@ -11,9 +11,11 @@ if __name__ == '__main__':
     # R = 2  # number of bootstrap
     num_trials = 500
 
-    for R in [2, 10, 50]:
+    for R in [3, 5, 8]:
         for d in [1, 11, 200]:
             x_star = np.linspace(0, 1, d)  # optimal solution
             x_0 = np.zeros(d)  # initial guess
             for eta in [1e-1,1e-2]:
                 main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials)
+                main_experiments_parallel_std(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials)
+
