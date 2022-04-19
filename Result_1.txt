@@ -112,3 +112,17 @@
 	 center in last trial:    [0.005899, ]
 	 CI UB in the last trial: [0.019885, ]
 	 CI LB in the last trial: [-0.008086, ]
+----->
+	 Cov Rate: 0.962 	 (0.19119623427254) 	Avg Len: 0.024557025261415105 	 (0.012825334998023442) 
+	 d: 1 	 n: 100000 	 R: 3 	 eta_0: 0.1 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007143, ]
+	 CI UB in the last trial: [0.032702, ]
+	 CI LB in the last trial: [-0.018417, ]
+----->
+	 Cov Rate: 0.956 	 (0.20509509989270833) 	Avg Len: 0.027462706493693183 	 (0.01470118803441531) 
+	 d: 1 	 n: 100000 	 R: 3 	 eta_0: 0.01 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 cenetter in last trial:    [0.005899, ]
+	 CI UB in the last trial: [0.024481, ]
+	 CI LB in the last trial: [-0.012682, ]
