@@ -178,12 +178,14 @@ def run_SGD_LR_BM(seed, x_star, x_prev, M, N, n, eta, var_epsilon, alpha):
     # Compute \tilde A_n and S_n to get sigma hat
     # Use sigma hat to get CI_radius
     xk = 0
-    x_bar_M = np.mean(x_history[np.floor(((N) ** (1/(1-alpha))))+1:,:] , axis=0)
+    # import pdb; pdb.set_trace()
+    x_bar_M = np.mean(x_history[int(np.floor(N ** (1/(1-alpha))))+1:n] , axis=0)
     BM_Estimator = np.zeros((d,d))
     for k in range(M+1):
-        ek = np.floor(((k+1)* N) ** (1/(1-alpha)))
+        ek = int(np.floor(((k+1)* N) ** (1/(1-alpha))))
         nk = ek - xk
-        x_bar_nk = np.mean(x_history[xk:ek+1,:] , axis=0)
+        x_bar_nk = np.mean(x_history[xk:ek+1] , axis=0)
+        import pdb; pdb.set_trace()
         BM_Estimator += nk * (x_bar_nk - x_bar_M) @ (x_bar_nk - x_bar_M).T /M
         xk = ek+1
     z = norm.ppf(0.975)
@@ -535,10 +537,10 @@ def main_experiments_parallel_BM(d, n, eta, alpha, x_star, x_0, M_ratio, var_eps
 
     # SGD origial loop
     # set random seed for original samples
-    M = np.floor(n ** (M_ratio))-1
-    N = np.floor(n**(1-M_ratio)/(M+1))
-    results = Parallel(n_jobs=32)(delayed(main_loop_BM)(seed, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials) for seed in range(1, 1+num_trials))
-    # main_loop_BM(1, x_star, x_0, n, eta, var_epsilon, alpha, num_trials)
+    M = int(np.floor(n ** (M_ratio)))-1
+    N = int(np.floor(n**(1-M_ratio)/(M+1)))
+    # results = Parallel(n_jobs=32)(delayed(main_loop_BM)(seed, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials) for seed in range(1, 1+num_trials))
+    main_loop_BM(1, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials)
     mean_len_history = []
     std_len_history = []
     len_history = []
