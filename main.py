@@ -155,6 +155,42 @@ def run_SGD_LR_plug_in(seed, x_star, x_prev, n, eta, var_epsilon, alpha, delta=1
     CI_radius = z * np.sqrt(np.diag(tilde_A_inv @ hat_S @ tilde_A_inv)) / np.sqrt(n)
     return x_out, CI_radius
 
+def run_SGD_LR_BM(seed, x_star, x_prev, M, N, n, eta, var_epsilon, alpha):
+    rng = np.random.default_rng(seed)
+    d = len(x_prev)
+    x_history = []
+    a_n_history = rng.normal(0, 1, (n, d))
+    epsilon_n_history = rng.normal(0, var_epsilon, n)
+    for iter_num in range(n):
+        # sample data
+        a_n = a_n_history[iter_num, :]
+        epsilon_n = epsilon_n_history[iter_num]
+        b_n = a_n @ x_star + epsilon_n
+        # update learning rate
+        eta_n = eta * (1 + iter_num) ** (-alpha)
+        # update rule
+        x_n = x_prev - eta_n * (a_n @ x_prev - b_n) * a_n
+        x_prev = x_n
+        # recording
+        x_history.append(x_n)
+    x_out = np.mean(x_history, axis=0)
+
+    # Compute \tilde A_n and S_n to get sigma hat
+    # Use sigma hat to get CI_radius
+    xk = 0
+    x_bar_M = np.mean(x_history[np.floor(((N) ** (1/(1-alpha))))+1:,:] , axis=0)
+    BM_Estimator = np.zeros((d,d))
+    for k in range(M+1):
+        ek = np.floor(((k+1)* N) ** (1/(1-alpha)))
+        nk = ek - xk
+        x_bar_nk = np.mean(x_history[xk:ek+1,:] , axis=0)
+        BM_Estimator += nk * (x_bar_nk - x_bar_M) @ (x_bar_nk - x_bar_M).T /M
+        xk = ek+1
+    z = norm.ppf(0.975)
+    CI_radius = z * np.sqrt(np.diag(BM_Estimator))/np.sqrt(n)
+
+    return x_out, CI_radius
+
 # SGD bootstrap loop
 # compute bootstrap confidence interval
 def bootstrap_CI_std(x_0, n, R, a_n_history, b_n_history, eta, alpha):
@@ -280,6 +316,16 @@ def main_loop_std(seed, x_star, x_0, n, R, eta, var_epsilon, alpha, num_trials):
 def main_loop_plug_in(seed, x_star, x_0, n, eta, var_epsilon, alpha, num_trials):
     print(f'Seed: [{seed}/{num_trials}] ...')
     x_out, CI_radius = run_SGD_LR_plug_in(seed, x_star, x_0, n, eta, var_epsilon, alpha)
+
+    mean_Len = np.mean(CI_radius * 2)
+    std_Len = np.std(CI_radius * 2)
+    cover = [1 if abs(x_out[ii] - x_star[ii]) <= CI_radius[ii] else 0 for ii in range(len(x_out))]
+
+    return mean_Len, std_Len, cover, CI_radius*2, x_out
+
+def main_loop_BM(seed, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials):
+    print(f'Seed: [{seed}/{num_trials}] ...')
+    x_out, CI_radius = run_SGD_LR_BM(seed, x_star, x_0, M, N, n, eta, var_epsilon, alpha)
 
     mean_Len = np.mean(CI_radius * 2)
     std_Len = np.std(CI_radius * 2)
@@ -452,6 +498,72 @@ def main_experiments_parallel_plug_in(d, n, eta, alpha, x_star, x_0, var_epsilon
     f.write(
         f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)/num_trials}) \n')
     f.write(f'\t d: {d} \t n: {n} \t R: N.A. \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
+    f.write(f'\t True solution:           [')
+    for ii in range(d):
+        f.write(f'{x_star[ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t center in last trial:    [')
+    for ii in range(d):
+        f.write(f'{x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI UB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI LB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{-len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    # f.write(f'\t Cover in the last trial: [')
+    # for ii in range(d):
+    #     f.write(f'{(cov_history)[-1][ii]:.0f}       , ')
+    # f.write(']\n')
+
+    f.close()
+
+    return
+
+def main_experiments_parallel_BM(d, n, eta, alpha, x_star, x_0, M_ratio, var_epsilon, num_trials):
+    # mean and variance for generating a_i
+    # identity covariance matrix case
+    #
+    # linear regression model:
+    # b_i = x_star^\top a_i + \epsilon_i
+    mean_a = np.zeros(d)
+    cov_a = np.eye(d)
+    Asy_cov = np.eye(d)  # asymptotic covariance matrix
+
+    # SGD origial loop
+    # set random seed for original samples
+    M = np.floor(n ** (M_ratio))-1
+    N = np.floor(n**(1-M_ratio)/(M+1))
+    results = Parallel(n_jobs=32)(delayed(main_loop_BM)(seed, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials) for seed in range(1, 1+num_trials))
+    # main_loop_BM(1, x_star, x_0, n, eta, var_epsilon, alpha, num_trials)
+    mean_len_history = []
+    std_len_history = []
+    len_history = []
+    cov_history = []
+    x_out_history = []
+    for ii in range(num_trials):
+        mean_len_history.append(results[ii][0])
+        std_len_history.append(results[ii][1])
+        cov_history.append(results[ii][2])
+        len_history.append(results[ii][3])
+        x_out_history.append(results[ii][4])
+
+
+    for seed in range(1, 1 + num_trials):
+        # debug code
+        print('*' * 20)
+        print(f'Len: {mean_len_history[seed - 1]:.6f} ({std_len_history[seed - 1]:.10f})')
+    print(np.mean(cov_history))
+    # import pdb; pdb.set_trace()
+
+    f = open(f'Result_BM_{d}.txt', 'a')
+    f.write('----->\n')
+    f.write(
+        f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)/num_trials}) \n')
+    f.write(f'\t d: {d} \t n: {n} \t M: {M} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
     f.write(f'\t True solution:           [')
     for ii in range(d):
         f.write(f'{x_star[ii]:.6f}, ')

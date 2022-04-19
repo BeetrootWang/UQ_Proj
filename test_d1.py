@@ -20,7 +20,7 @@ if __name__ == '__main__':
                 main_experiments_parallel_std(d, n, eta, alpha, x_star, x_0, R, var_epsilon, num_trials)
 
 # TODO: Go through Xi's paper; Check how they describe plug-in and batch mean estimator
-# TODO: R = 3,5,8 [running]
+# TODO: R = 3,5,8 [Done]
 # TODO: without replacement experiment
 # TODO: Implement Xi's work: warm up/Sensitivity to X_0?
 # TODO: Proof of non-averaging case
