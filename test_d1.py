@@ -12,7 +12,7 @@ if __name__ == '__main__':
     num_trials = 500
 
     for R in [3, 5, 8]:
-        for d in [1, 11, 200]:
+        for d in [1, 5, 11, 20, 100, 200]:
             x_star = np.linspace(0, 1, d)  # optimal solution
             x_0 = np.zeros(d)  # initial guess
             for eta in [1e-1,1e-2]:
