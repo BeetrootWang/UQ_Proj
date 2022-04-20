@@ -564,7 +564,7 @@ def main_experiments_parallel_BM(d, n, eta, alpha, x_star, x_0, M_ratio, var_eps
     f.write('----->\n')
     f.write(
         f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)/num_trials}) \n')
-    f.write(f'\t d: {d} \t n: {n} \t M: {M} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
+    f.write(f'\t d: {d} \t n: {n} \t M ratio: {M_ratio} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
     f.write(f'\t True solution:           [')
     for ii in range(d):
         f.write(f'{x_star[ii]:.6f}, ')
