@@ -1,4 +1,4 @@
-from main import main_experiments, main_experiments_parallel_BM, main_experiments_parallel_BM_v2
+from main import main_experiments, main_experiments_parallel_BM
 import numpy as np
 
 if __name__ == '__main__':

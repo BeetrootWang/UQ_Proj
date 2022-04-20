@@ -185,11 +185,11 @@ def run_SGD_LR_BM(seed, x_star, x_prev, M, N, n, eta, var_epsilon, alpha):
         nk = ek - xk
         x_bar_nk = np.mean(x_history[xk:ek+1] , axis=0)
         print(nk)
-        BM_Estimator += nk * (x_bar_nk - x_bar_M) @ (x_bar_nk - x_bar_M).T /M
+        BM_Estimator += nk * (x_bar_nk - x_bar_M).reshape([d,1]) @ (x_bar_nk - x_bar_M).reshape([1,d]) /M
         xk = ek+1
     z = norm.ppf(0.975)
     CI_radius = z * np.sqrt(np.diag(BM_Estimator))/np.sqrt(n)
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     return x_out, CI_radius
 
 # SGD bootstrap loop
