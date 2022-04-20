@@ -1,0 +1,28 @@
+----->
+	 Cov Rate: 0.906 	 (0.2918287168871494) 	Avg Len: 0.012193516725460412 	 (4.343470092013327e-06) 
+	 d: 1 	 n: 100000 	 M ratio: 0.25 	 eta_0: 0.5 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007262, ]
+	 CI UB in the last trial: [0.018656, ]
+	 CI LB in the last trial: [-0.004132, ]
+----->
+	 Cov Rate: 0.874 	 (0.331849363416596) 	Avg Len: 0.010801009749875192 	 (4.007147764236337e-06) 
+	 d: 1 	 n: 100000 	 M ratio: 0.25 	 eta_0: 0.1 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007143, ]
+	 CI UB in the last trial: [0.016538, ]
+	 CI LB in the last trial: [-0.002253, ]
+----->
+	 Cov Rate: 0.796 	 (0.4029689814365368) 	Avg Len: 0.00929206588687409 	 (3.853209380668316e-06) 
+	 d: 1 	 n: 100000 	 M ratio: 0.25 	 eta_0: 0.05 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007288, ]
+	 CI UB in the last trial: [0.015138, ]
+	 CI LB in the last trial: [-0.000563, ]
+----->
+	 Cov Rate: 0.502 	 (0.4999959999839998) 	Avg Len: 0.004792473984510995 	 (3.560944176888388e-06) 
+	 d: 1 	 n: 100000 	 M ratio: 0.25 	 eta_0: 0.01 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.005899, ]
+	 CI UB in the last trial: [0.010340, ]
+	 CI LB in the last trial: [0.001459, ]
