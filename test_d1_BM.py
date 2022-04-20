@@ -9,7 +9,7 @@ if __name__ == '__main__':
     alpha = 0.501  # step size eta_i = eta * i^{-alpha}
     num_trials = 500
 
-    for d in [5]:
+    for d in [1,11,20,100,200]:
     # for d in [1m5]:
         for M_ratio in [0.2, 0.25, 0.3]:
             for eta in [1e-1,5e-2,1e-2]:
