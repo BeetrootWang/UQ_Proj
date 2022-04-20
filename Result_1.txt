@@ -126,3 +126,45 @@
 	 cenetter in last trial:    [0.005899, ]
 	 CI UB in the last trial: [0.024481, ]
 	 CI LB in the last trial: [-0.012682, ]
+----->
+	 Cov Rate: 0.962 	 (0.19119623427254) 	Avg Len: 0.024557025261415105 	 (2.5650669996046883e-05) 
+	 d: 1 	 n: 100000 	 R: 3 	 eta_0: 0.1 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007143, ]
+	 CI UB in the last trial: [0.032702, ]
+	 CI LB in the last trial: [-0.018417, ]
+----->
+	 Cov Rate: 0.956 	 (0.20509509989270833) 	Avg Len: 0.027462706493693183 	 (2.9402376068830618e-05) 
+	 d: 1 	 n: 100000 	 R: 3 	 eta_0: 0.01 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.005899, ]
+	 CI UB in the last trial: [0.024481, ]
+	 CI LB in the last trial: [-0.012682, ]
+----->
+	 Cov Rate: 0.952 	 (0.2137662274541982) 	Avg Len: 0.0170365919272687 	 (1.2295810331374196e-05) 
+	 d: 1 	 n: 100000 	 R: 5 	 eta_0: 0.1 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007143, ]
+	 CI UB in the last trial: [0.022307, ]
+	 CI LB in the last trial: [-0.008021, ]
+----->
+	 Cov Rate: 0.946 	 (0.22601769842204836) 	Avg Len: 0.01925665228325078 	 (1.4141597473732433e-05) 
+	 d: 1 	 n: 100000 	 R: 5 	 eta_0: 0.01 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.005899, ]
+	 CI UB in the last trial: [0.018137, ]
+	 CI LB in the last trial: [-0.006338, ]
+----->
+	 Cov Rate: 0.928 	 (0.2584879107424562) 	Avg Len: 0.01479500405546387 	 (8.183070107157206e-06) 
+	 d: 1 	 n: 100000 	 R: 8 	 eta_0: 0.1 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007143, ]
+	 CI UB in the last trial: [0.020124, ]
+	 CI LB in the last trial: [-0.005838, ]
+----->
+	 Cov Rate: 0.938 	 (0.24115555146004827) 	Avg Len: 0.016681343538066776 	 (9.098455456936128e-06) 
+	 d: 1 	 n: 100000 	 R: 8 	 eta_0: 0.01 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.005899, ]
+	 CI UB in the last trial: [0.016737, ]
+	 CI LB in the last trial: [-0.004938, ]

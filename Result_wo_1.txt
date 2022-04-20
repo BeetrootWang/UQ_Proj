@@ -1,0 +1,42 @@
+----->
+	 Cov Rate: 0.356 	 (0.4788152044369519) 	Avg Len: 0.003282178307337503 	 (3.4933616231982156e-06) 
+	 d: 1 	 n: 100000 	 R: 3 	 eta_0: 0.1 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007143, ]
+	 CI UB in the last trial: [0.007579, ]
+	 CI LB in the last trial: [0.006706, ]
+----->
+	 Cov Rate: 0.836 	 (0.3702755730533679) 	Avg Len: 0.014913205758495206 	 (1.604221379920816e-05) 
+	 d: 1 	 n: 100000 	 R: 3 	 eta_0: 0.01 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.005899, ]
+	 CI UB in the last trial: [0.010710, ]
+	 CI LB in the last trial: [0.001089, ]
+----->
+	 Cov Rate: 0.248 	 (0.4318518264405049) 	Avg Len: 0.002231012657036765 	 (1.6983047391887044e-06) 
+	 d: 1 	 n: 100000 	 R: 5 	 eta_0: 0.1 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007143, ]
+	 CI UB in the last trial: [0.007770, ]
+	 CI LB in the last trial: [0.006515, ]
+----->
+	 Cov Rate: 0.798 	 (0.4014922166119787) 	Avg Len: 0.01031951768203654 	 (7.909578514735267e-06) 
+	 d: 1 	 n: 100000 	 R: 5 	 eta_0: 0.01 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.005899, ]
+	 CI UB in the last trial: [0.014058, ]
+	 CI LB in the last trial: [-0.002259, ]
+----->
+	 Cov Rate: 0.22 	 (0.41424630354415964) 	Avg Len: 0.001954603305319742 	 (1.0932215622989597e-06) 
+	 d: 1 	 n: 100000 	 R: 8 	 eta_0: 0.1 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.007143, ]
+	 CI UB in the last trial: [0.007946, ]
+	 CI LB in the last trial: [0.006339, ]
+----->
+	 Cov Rate: 0.768 	 (0.4221089906647335) 	Avg Len: 0.009092381181154912 	 (4.89505334826946e-06) 
+	 d: 1 	 n: 100000 	 R: 8 	 eta_0: 0.01 	 alpha: 0.501 	 # Trials: 500
+	 True solution:           [0.000000, ]
+	 center in last trial:    [0.005899, ]
+	 CI UB in the last trial: [0.011691, ]
+	 CI LB in the last trial: [0.000108, ]
