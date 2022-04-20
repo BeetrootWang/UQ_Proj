@@ -184,7 +184,6 @@ def run_SGD_LR_BM(seed, x_star, x_prev, M, N, n, eta, var_epsilon, alpha):
         ek = int(np.floor(((k+1)* N) ** (1/(1-alpha))))
         nk = ek - xk
         x_bar_nk = np.mean(x_history[xk:ek+1] , axis=0)
-        print(nk)
         BM_Estimator += nk * (x_bar_nk - x_bar_M).reshape([d,1]) @ (x_bar_nk - x_bar_M).reshape([1,d]) /M
         xk = ek+1
     z = norm.ppf(0.975)
