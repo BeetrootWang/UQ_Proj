@@ -589,6 +589,72 @@ def main_experiments_parallel_BM(d, n, eta, alpha, x_star, x_0, M_ratio, var_eps
 
     return
 
+def main_experiments_parallel_BM_v2(d, n, eta, alpha, x_star, x_0, M_ratio, var_epsilon, num_trials):
+    # mean and variance for generating a_i
+    # identity covariance matrix case
+    #
+    # linear regression model:
+    # b_i = x_star^\top a_i + \epsilon_i
+    mean_a = np.zeros(d)
+    cov_a = np.eye(d)
+    Asy_cov = np.eye(d)  # asymptotic covariance matrix
+
+    # SGD origial loop
+    # set random seed for original samples
+    M = int(np.floor(n ** (M_ratio)))-1
+    N = int(np.floor(n**(1-alpha)/(M+1)))
+    results = Parallel(n_jobs=32)(delayed(main_loop_BM)(seed, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials) for seed in range(1, 1+num_trials))
+    # main_loop_BM(1, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials)
+    mean_len_history = []
+    std_len_history = []
+    len_history = []
+    cov_history = []
+    x_out_history = []
+    for ii in range(num_trials):
+        mean_len_history.append(results[ii][0])
+        std_len_history.append(results[ii][1])
+        cov_history.append(results[ii][2])
+        len_history.append(results[ii][3])
+        x_out_history.append(results[ii][4])
+
+
+    for seed in range(1, 1 + num_trials):
+        # debug code
+        print('*' * 20)
+        print(f'Len: {mean_len_history[seed - 1]:.6f} ({std_len_history[seed - 1]:.10f})')
+    print(np.mean(cov_history))
+    # import pdb; pdb.set_trace()
+
+    f = open(f'Result_BM_WS_{d}.txt', 'a')
+    f.write('----->\n')
+    f.write(
+        f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)/num_trials}) \n')
+    f.write(f'\t d: {d} \t n: {n} \t M ratio: {M_ratio} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
+    f.write(f'\t True solution:           [')
+    for ii in range(d):
+        f.write(f'{x_star[ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t center in last trial:    [')
+    for ii in range(d):
+        f.write(f'{x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI UB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI LB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{-len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    # f.write(f'\t Cover in the last trial: [')
+    # for ii in range(d):
+    #     f.write(f'{(cov_history)[-1][ii]:.0f}       , ')
+    # f.write(']\n')
+
+    f.close()
+
+    return
+
 if __name__ == '__main__':
     # basic setting
     var_epsilon = 1  # variance for noise in linear regression
