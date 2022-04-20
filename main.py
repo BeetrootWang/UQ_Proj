@@ -188,7 +188,7 @@ def run_SGD_LR_BM(seed, x_star, x_prev, M, N, n, eta, var_epsilon, alpha):
         xk = ek+1
     z = norm.ppf(0.975)
     CI_radius = z * np.sqrt(np.diag(BM_Estimator))/np.sqrt(n)
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     return x_out, CI_radius
 
 # SGD bootstrap loop
@@ -537,8 +537,8 @@ def main_experiments_parallel_BM(d, n, eta, alpha, x_star, x_0, M_ratio, var_eps
     # set random seed for original samples
     M = int(np.floor(n ** (M_ratio)))-1
     N = int(np.floor(n**(1-alpha)/(M+1)))
-    # results = Parallel(n_jobs=32)(delayed(main_loop_BM)(seed, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials) for seed in range(1, 1+num_trials))
-    main_loop_BM(1, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials)
+    results = Parallel(n_jobs=32)(delayed(main_loop_BM)(seed, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials) for seed in range(1, 1+num_trials))
+    # main_loop_BM(1, x_star, x_0, M, N, n, eta, var_epsilon, alpha, num_trials)
     mean_len_history = []
     std_len_history = []
     len_history = []
