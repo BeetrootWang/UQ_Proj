@@ -14,4 +14,4 @@ if __name__ == '__main__':
                 for cov_a_str in ['toeplitz','equi']:
                     x_star = np.linspace(0, 1, d)  # optimal solution
                     x_0 = np.zeros(d)  # initial guess
-                    main_experiments_parallel_plug_in(d, n, eta, alpha, x_star, x_0, var_epsilon, num_trials)
+                    main_experiments_parallel_plug_in(d, n, eta, alpha, x_star, x_0, var_epsilon, cov_a_str, num_trials)
