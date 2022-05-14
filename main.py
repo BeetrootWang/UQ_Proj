@@ -423,7 +423,7 @@ def main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, cov
 
     # SGD origial loop
     # set random seed for original samples
-    results = Parallel(n_jobs=32)(delayed(main_loop)(seed, x_star, x_0, n, R, eta, var_epsilon, mean_a, cov_a, alpha, num_trials) for seed in range(1, 1+num_trials))
+    results = Parallel(n_jobs=24)(delayed(main_loop)(seed, x_star, x_0, n, R, eta, var_epsilon, mean_a, cov_a, alpha, num_trials) for seed in range(1, 1+num_trials))
     mean_len_history = []
     std_len_history = []
     len_history = []
@@ -497,7 +497,7 @@ def main_experiments_parallel_std(d, n, eta, alpha, x_star, x_0, R, var_epsilon,
 
     # SGD origial loop
     # set random seed for original samples
-    results = Parallel(n_jobs=32)(delayed(main_loop_std)(seed, x_star, x_0, n, R, eta, var_epsilon, mean_a, cov_a, alpha, num_trials) for seed in range(1, 1+num_trials))
+    results = Parallel(n_jobs=24)(delayed(main_loop_std)(seed, x_star, x_0, n, R, eta, var_epsilon, mean_a, cov_a, alpha, num_trials) for seed in range(1, 1+num_trials))
     mean_len_history = []
     std_len_history = []
     len_history = []
