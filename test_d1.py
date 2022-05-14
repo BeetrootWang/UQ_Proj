@@ -8,7 +8,7 @@ if __name__ == '__main__':
     alpha = 0.501  # step size eta_i = eta * i^{-alpha}
     num_trials = 500
 
-    for R in [3,5,10]:
+    for R in [10]:
         for d in [5,20,100,200]:
             x_star = np.linspace(0, 1, d)  # optimal solution
             x_0 = np.zeros(d)  # initial guess
