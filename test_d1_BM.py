@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     for d in [5, 20, 100, 200]:
         for eta in [5e-1,1e-1,5e-2,1e-2]:
-                for cov_a_str in ['toeplitz','equi']:
+                for cov_a_str in ['identity']:
                     for M_ratio in [0.25]:
                             x_star = np.linspace(0, 1, d)  # optimal solution
                             x_0 = np.zeros(d)  # initial guess
