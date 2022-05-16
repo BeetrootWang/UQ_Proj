@@ -10,10 +10,10 @@ if __name__ == '__main__':
 
     for R in [10]:
         n = int(1e5)
-        for d in [5,20,200]:
+        for d in [200]:
             x_star = np.linspace(0, 1, d)  # optimal solution
             x_0 = np.zeros(d)  # initial guess
-            for eta in [5e-1,1e-1,5e-2,1e-2]:
+            for eta in [5e-2,1e-2]:
                 for cov_a_str in ['identity', 'toeplitz','equi']:
                     main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, cov_a_str, num_trials)
                     main_experiments_parallel_std(d, n, eta, alpha, x_star, x_0, R, var_epsilon, cov_a_str, num_trials)
