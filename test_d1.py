@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     for R in [3,5,10]:
         n = int(1e5/R)
-        for d in [200]:
+        for d in [5,20]:
             x_star = np.linspace(0, 1, d)  # optimal solution
             x_0 = np.zeros(d)  # initial guess
             for eta in [5e-1, 1e-1]:
