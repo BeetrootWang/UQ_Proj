@@ -8,15 +8,14 @@ if __name__ == '__main__':
     alpha = 0.501  # step size eta_i = eta * i^{-alpha}
     num_trials = 500
 
-    for R in [3,5,10]:
-        n = int(1e5/R)
-        for d in [5,20]:
+    for R in [3]:
+        for d in [5]:
             x_star = np.linspace(0, 1, d)  # optimal solution
             x_0 = np.zeros(d)  # initial guess
-            for eta in [5e-1, 1e-1]:
+            for eta in np.linspace(0.01,0.1,5):
                 for cov_a_str in ['identity']:
+                    n=int(1e5)
                     main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, cov_a_str, num_trials)
-                    main_experiments_parallel_std(d, n, eta, alpha, x_star, x_0, R, var_epsilon, cov_a_str, num_trials)
 
 # DONE: Go through Xi's paper; Check how they describe plug-in and batch mean estimator [done]
 # DONE: R = 3,5,8 [Done]
