@@ -255,6 +255,7 @@ def run_SGD_LR_OB(seed, x_star, x_prev, n, B, eta, var_epsilon, mean_a, cov_a, a
     x_bar_B = np.repeat(np.reshape(x_prev,(1,d)), B, axis=0)
     # a_n_history = rng.normal(0, 1, (n, d))
     a_n_history = rng.multivariate_normal(mean=mean_a, cov=cov_a, size=(n))
+    W = rng.exponential(1, [n,B])
     epsilon_n_history = rng.normal(0, var_epsilon, n)
     for iter_num in range(n):
         # sample data
@@ -267,9 +268,9 @@ def run_SGD_LR_OB(seed, x_star, x_prev, n, B, eta, var_epsilon, mean_a, cov_a, a
         x_n = x_prev - eta_n * (a_n @ x_prev - b_n) * a_n
         x_prev = x_n
         # Generate Perturbation
-        W = rng.exponential(1,B)
+        # W = rng.exponential(1,B)
         for ii in range(B):
-            x_B[ii,:] = x_B_prev[ii,:] - W[ii] * eta_n * (a_n @ x_B_prev[ii,:] - b_n) * a_n
+            x_B[ii,:] = x_B_prev[ii,:] - W[iter_num, ii] * eta_n * (a_n @ x_B_prev[ii,:] - b_n) * a_n
             x_bar_B[ii,:] = iter_num * x_bar_B_prev[ii,:] / (iter_num+1.) + x_B[ii,:] / (iter_num+1.)
             x_B_prev[ii,:] = x_B[ii,:]
             x_bar_B_prev[ii,:] = x_bar_B[ii,:]

@@ -8,8 +8,7 @@ if __name__ == '__main__':
     n = int(1e5)  # sample size
     alpha = 0.501  # step size eta_i = eta * i^{-alpha}
     num_trials = 500
-
-    for B in [10, 100]:
+    for B in [100]:
         for d in [5,20]:
             # for eta in np.linspace(0.02,0.1,8):
             for eta in [0.5,0.1,0.05,0.01]:
