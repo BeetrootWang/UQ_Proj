@@ -277,7 +277,7 @@ def run_SGD_LR_OB(seed, x_star, x_prev, n, B, eta, var_epsilon, mean_a, cov_a, a
         x_history.append(x_n)
     x_out = np.mean(x_history, axis=0)
     # CI for Online Bootstrap Estimator
-    OB_Estimator = np.sum((x_bar_B - np.repeat(np.reshape(x_out,(1,d)), B, axis=0))**2, axis=0)
+    OB_Estimator = np.mean((x_bar_B - np.repeat(np.reshape(x_out,(1,d)), B, axis=0))**2, axis=0) * n
     z = norm.ppf(0.975)
     CI_radius = z * np.sqrt(OB_Estimator)/np.sqrt(n)
     # import pdb; pdb.set_trace()
@@ -943,7 +943,7 @@ def main_experiments_parallel_OB(d, n, eta, alpha, x_star, x_0, B, var_epsilon, 
     print(np.mean(cov_history))
     # import pdb; pdb.set_trace()
 
-    f = open(f'Result_OB_{d}_{cov_a_str}.txt', 'a')
+    f = open(f'Result_OB{B}_{d}_{cov_a_str}.txt', 'a')
     f.write('----->\n')
     f.write(
         f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)/num_trials}) \n')
