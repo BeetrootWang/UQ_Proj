@@ -13,7 +13,7 @@ if __name__ == '__main__':
             x_star = np.linspace(0, 1, d)  # optimal solution
             x_0 = np.zeros(d)  # initial guess
             for eta in np.linspace(0.02,0.1,8):
-                for cov_a_str in ['identity']:
+                for cov_a_str in ['toeplitz','equi']:
                     n=int(1e4)
                     main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, cov_a_str, num_trials)
 
