@@ -5,12 +5,12 @@ if __name__ == '__main__':
     # basic setting
     var_epsilon = 1  # variance for noise in linear regression
     # d = 11  # d = 5,20,100,200
-    n = int(1e5)  # sample size
+    n = int(1e4)  # sample size
     alpha = 0.501  # step size eta_i = eta * i^{-alpha}
-    num_trials = 500
+    num_trials = 100
 
-    for d in [5]:
-        for eta in np.linspace(0.01,0.1,5):
+    for d in [200]:
+        for eta in np.linspace(0.02,0.1,8):
             for cov_a_str in ['identity']:
                 x_star = np.linspace(0, 1, d)  # optimal solution
                 x_0 = np.zeros(d)  # initial guess
