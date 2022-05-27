@@ -5,13 +5,14 @@ result_str_3 = '$R=3$  '
 result_str_5 = '$R=5$  '
 result_str_10 = '$R=10$ '
 for target_d in [5,20,200]:
-    target_n = int(1e5)
+    target_n = int(1e4)
     best_cov = [0,0,0,0] # Corresponds to R = 3,5,10,50
     best_cov_var = [0,0,0,0]
     best_len = [1e5, 1e5, 1e5, 1e5]
     best_len_var = [0,0,0,0]
-    filename = f'Result_{target_d}_identity.txt'
+    filename = f'./results_3/Result_{target_d}_equi.txt'
     f = open(filename, 'r')
+    print(filename)
     R_or_Ratio = np.NaN
     ii=1
     for line in f:
