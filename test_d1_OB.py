@@ -10,9 +10,9 @@ if __name__ == '__main__':
     num_trials = 500
 
     for B in [10, 100]:
-        for d in [200]:
-            for eta in np.linspace(0.02,0.1,8):
-            # for eta in [0.5,0.1,0.05,0.01]:
+        for d in [5,20,200]:
+            # for eta in np.linspace(0.02,0.1,8):
+            for eta in [0.5,0.1,0.05,0.01]:
                 for cov_a_str in ['identity','toeplitz','equi']:
                     x_star = np.linspace(0, 1, d)  # optimal solution
                     x_0 = np.zeros(d)  # initial guess
