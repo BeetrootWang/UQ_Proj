@@ -14,7 +14,7 @@ if __name__ == '__main__':
             x_0 = np.zeros(d)  # initial guess
             # for eta in np.linspace(0.02,0.1,8):
             for eta in [0.5,0.1,0.05,0.01]:
-                for cov_a_str in ['equi']:
+                for cov_a_str in ['toeplitz']:
                     # n=int(1e4/R)
                     main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, cov_a_str, num_trials)
 
