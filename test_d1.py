@@ -9,13 +9,13 @@ if __name__ == '__main__':
     num_trials = 500
 
     for R in [3,5,10]:
-        for d in [5,20,200]:
+        for d in [200]:
             x_star = np.linspace(0, 1, d)  # optimal solution
             x_0 = np.zeros(d)  # initial guess
             # for eta in np.linspace(0.02,0.1,8):
             for eta in [0.5,0.1,0.05,0.01]:
-                for cov_a_str in ['identity','toeplitz','equi']:
-                    n=int(1e4/R)
+                for cov_a_str in ['equi']:
+                    # n=int(1e4/R)
                     main_experiments_parallel(d, n, eta, alpha, x_star, x_0, R, var_epsilon, cov_a_str, num_trials)
 
 # DONE: Go through Xi's paper; Check how they describe plug-in and batch mean estimator [done]
