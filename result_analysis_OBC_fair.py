@@ -1,7 +1,6 @@
 # Process the result of numerical experiments
 import numpy as np
 cnt = 0
-B = 10
 for B in [3,5,10]:
     result_str = f'rerun ($B={B}$) '
     for target_d in [5,20,200]:
@@ -37,14 +36,14 @@ for B in [3,5,10]:
                 d = int(tmp[1])
                 n = int(tmp[3])
                 if 'BM' in filename:
-                    if n!= target_n:
+                    if n!= int(target_n / B):
                         continue
                     R_or_Ratio = tmp[5+1]
                     eta_0 = float(tmp[7+1])
                     alpha = float(tmp[9+1])
                     num_trials = int(tmp[12+1])
                 else:
-                    if n!= target_n:
+                    if n!= int(target_n / B):
                         cov=0
                         Len=1e5
                         continue

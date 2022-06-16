@@ -1,16 +1,15 @@
 # Process the result of numerical experiments
 import numpy as np
 cnt = 0
-B = 10
 for B in [3,5,10]:
-    result_str = f'rerun ($B={B}$) '
+    result_str = f'OBC ($B={B}$) '
     for target_d in [5,20,200]:
         target_n = int(1e4)
         best_cov = 0 # Corresponds to R = 3,5,10,50
         best_cov_var = 0
         best_len = 1e5
         best_len_var = 0
-        filename = f'Result_simplererun{B}_{target_d}_equi.txt'
+        filename = f'Result_OBC{B}_{target_d}_equi.txt'
         # print(filename)
         f = open(filename, 'r')
         R_or_Ratio = 'something wrong'

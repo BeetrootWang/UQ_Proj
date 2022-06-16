@@ -284,6 +284,84 @@ def run_SGD_LR_OB(seed, x_star, x_prev, n, B, eta, var_epsilon, mean_a, cov_a, a
     # import pdb; pdb.set_trace()
     return x_out, CI_radius
 
+
+def run_SGD_LR_OBC(seed, x_star, x_prev, n, B, eta, var_epsilon, mean_a, cov_a, alpha):
+    rng = np.random.default_rng(seed)
+    d = len(x_prev)
+    x_history = []
+    x_B_prev = np.repeat(np.reshape(x_prev,(1,d)), B, axis=0)
+    x_B = np.repeat(np.reshape(x_prev,(1,d)), B, axis=0)
+    x_bar_B_prev = np.repeat(np.reshape(x_prev,(1,d)), B, axis=0)
+    x_bar_B = np.repeat(np.reshape(x_prev,(1,d)), B, axis=0)
+    # a_n_history = rng.normal(0, 1, (n, d))
+    a_n_history = rng.multivariate_normal(mean=mean_a, cov=cov_a, size=(n))
+    W = rng.exponential(1, [n,B])
+    epsilon_n_history = rng.normal(0, var_epsilon, n)
+    for iter_num in range(n):
+        # sample data
+        a_n = a_n_history[iter_num, :]
+        epsilon_n = epsilon_n_history[iter_num]
+        b_n = a_n @ x_star + epsilon_n
+        # update learning rate
+        eta_n = eta * (1 + iter_num) ** (-alpha)
+        # update rule
+        x_n = x_prev - eta_n * (a_n @ x_prev - b_n) * a_n
+        x_prev = x_n
+        # Generate Perturbation
+        # W = rng.exponential(1,B)
+        for ii in range(B):
+            x_B[ii,:] = x_B_prev[ii,:] - W[iter_num, ii] * eta_n * (a_n @ x_B_prev[ii,:] - b_n) * a_n
+            x_bar_B[ii,:] = iter_num * x_bar_B_prev[ii,:] / (iter_num+1.) + x_B[ii,:] / (iter_num+1.)
+            x_B_prev[ii,:] = x_B[ii,:]
+            x_bar_B_prev[ii,:] = x_bar_B[ii,:]
+        # recording
+        x_history.append(x_n)
+    x_out = np.mean(x_history, axis=0)
+    # CI for Online Bootstrap Estimator
+    OB_Estimator = np.mean((x_bar_B - np.repeat(np.reshape(x_out,(1,d)), B, axis=0))**2, axis=0) * n
+    z = t.ppf(0.975,B)
+    CI_radius = z * np.sqrt(OB_Estimator)/np.sqrt(n)
+    # import pdb; pdb.set_trace()
+    return x_out, CI_radius
+
+def run_SGD_LR_simple_rerun(seed, x_star, x_prev, n, B, eta, var_epsilon, mean_a, cov_a, alpha):
+    rng = np.random.default_rng(seed)
+    d = len(x_prev)
+    x_history = []
+    x_B_prev = np.repeat(np.reshape(x_prev,(1,d)), B, axis=0)
+    x_B = np.repeat(np.reshape(x_prev,(1,d)), B, axis=0)
+    x_bar_B_prev = np.repeat(np.reshape(x_prev,(1,d)), B, axis=0)
+    x_bar_B = np.repeat(np.reshape(x_prev,(1,d)), B, axis=0)
+    # a_n_history = rng.normal(0, 1, (n, d))
+    a_n_history = rng.multivariate_normal(mean=mean_a, cov=cov_a, size=(n*B))
+    epsilon_n_history = rng.normal(0, var_epsilon, n*B)
+    for iter_num in range(n):
+        # update learning rate
+        eta_n = eta * (1 + iter_num) ** (-alpha)
+        for ii in range(B):
+            # sample data
+            a_n = a_n_history[iter_num*B+ii, :]
+            epsilon_n = epsilon_n_history[iter_num*B+ii]
+            b_n = a_n @ x_star + epsilon_n
+            # update rule
+            # x_n = x_prev - eta_n * (a_n @ x_prev - b_n) * a_n
+            # x_prev = x_n
+            # Generate Perturbation
+            # W = rng.exponential(1,B)
+
+            x_B[ii,:] = x_B_prev[ii,:] -  eta_n * (a_n @ x_B_prev[ii,:] - b_n) * a_n
+            x_bar_B[ii,:] = iter_num * x_bar_B_prev[ii,:] / (iter_num+1.) + x_B[ii,:] / (iter_num+1.)
+            x_B_prev[ii,:] = x_B[ii,:]
+            x_bar_B_prev[ii,:] = x_bar_B[ii,:]
+
+    x_out = np.mean(x_bar_B, axis=0)
+    # CI for Online Bootstrap Estimator
+    var_estimator = np.sum((x_bar_B - np.repeat(np.reshape(x_out,(1,d)), B, axis=0))**2, axis=0) * n / (B-1)
+    z = t.ppf(0.975,B-1)
+    CI_radius = z * np.sqrt(var_estimator)/np.sqrt(n)
+    # import pdb; pdb.set_trace()
+    return x_out, CI_radius
+
 # SGD bootstrap loop
 # compute bootstrap confidence interval
 def bootstrap_CI_std(x_0, n, R, a_n_history, b_n_history, eta, alpha):
@@ -440,6 +518,24 @@ def main_loop_wo(seed, x_star, x_0, n, R, eta, var_epsilon, mean_a, cov_a, alpha
 def main_loop_OB(seed, x_star, x_0, n, B, eta, var_epsilon, mean_a, cov_a, alpha, num_trials):
     print(f'Seed: [{seed}/{num_trials}] ...')
     x_out, CI_radius = run_SGD_LR_OB(seed, x_star, x_0, n, B, eta, var_epsilon, mean_a, cov_a, alpha)
+    mean_Len = np.mean(CI_radius * 2)
+    std_Len = np.std(CI_radius * 2)
+    cover = [1 if abs(x_out[ii] - x_star[ii]) <= CI_radius[ii] else 0 for ii in range(len(x_out))]
+
+    return mean_Len, std_Len, cover, CI_radius*2, x_out
+
+def main_loop_OBC(seed, x_star, x_0, n, B, eta, var_epsilon, mean_a, cov_a, alpha, num_trials):
+    print(f'Seed: [{seed}/{num_trials}] ...')
+    x_out, CI_radius = run_SGD_LR_OBC(seed, x_star, x_0, n, B, eta, var_epsilon, mean_a, cov_a, alpha)
+    mean_Len = np.mean(CI_radius * 2)
+    std_Len = np.std(CI_radius * 2)
+    cover = [1 if abs(x_out[ii] - x_star[ii]) <= CI_radius[ii] else 0 for ii in range(len(x_out))]
+
+    return mean_Len, std_Len, cover, CI_radius*2, x_out
+
+def main_loop_simple_rerun(seed, x_star, x_0, n, B, eta, var_epsilon, mean_a, cov_a, alpha, num_trials):
+    print(f'Seed: [{seed}/{num_trials}] ...')
+    x_out, CI_radius = run_SGD_LR_simple_rerun(seed, x_star, x_0, n, B, eta, var_epsilon, mean_a, cov_a, alpha)
     mean_Len = np.mean(CI_radius * 2)
     std_Len = np.std(CI_radius * 2)
     cover = [1 if abs(x_out[ii] - x_star[ii]) <= CI_radius[ii] else 0 for ii in range(len(x_out))]
@@ -945,6 +1041,155 @@ def main_experiments_parallel_OB(d, n, eta, alpha, x_star, x_0, B, var_epsilon, 
     # import pdb; pdb.set_trace()
 
     f = open(f'Result_OB{B}_{d}_{cov_a_str}.txt', 'a')
+    f.write('----->\n')
+    f.write(
+        f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)/num_trials}) \n')
+    f.write(f'\t d: {d} \t n: {n} \t B: {B} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
+    f.write(f'\t True solution:           [')
+    for ii in range(d):
+        f.write(f'{x_star[ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t center in last trial:    [')
+    for ii in range(d):
+        f.write(f'{x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI UB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI LB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{-len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    # f.write(f'\t Cover in the last trial: [')
+    # for ii in range(d):
+    #     f.write(f'{(cov_history)[-1][ii]:.0f}       , ')
+    # f.write(']\n')
+
+    f.close()
+
+    return
+
+def main_experiments_parallel_OBC(d, n, eta, alpha, x_star, x_0, B, var_epsilon, cov_a_str, num_trials):
+    # mean and variance for generating a_i
+    # identity covariance matrix case
+    #
+    # linear regression model:
+    # b_i = x_star^\top a_i + \epsilon_i
+    if cov_a_str == 'identity':
+        mean_a = np.zeros(d)
+        cov_a = np.eye(d)
+    elif cov_a_str == 'toeplitz':
+        mean_a = np.zeros(d)
+        cov_a = np.eye(d)
+        r = 0.5
+        for ii in range(d):
+            for jj in range(d):
+                cov_a[ii, jj] = r ** np.abs(ii - jj)
+    elif cov_a_str == 'equi':
+        mean_a = np.zeros(d)
+        r = 0.2
+        cov_a = r * np.ones((d, d)) + (1 - r) * np.eye(d)
+
+    # SGD origial loop
+    # set random seed for original samples
+    results = Parallel(n_jobs=32)(delayed(main_loop_OBC)(seed, x_star, x_0, n, B, eta, var_epsilon, mean_a, cov_a, alpha, num_trials) for seed in range(1, 1+num_trials))
+    # main_loop_OB(1, x_star, x_0, n, B, eta, var_epsilon, mean_a, cov_a, alpha, num_trials)
+    mean_len_history = []
+    std_len_history = []
+    len_history = []
+    cov_history = []
+    x_out_history = []
+    for ii in range(num_trials):
+        mean_len_history.append(results[ii][0])
+        std_len_history.append(results[ii][1])
+        cov_history.append(results[ii][2])
+        len_history.append(results[ii][3])
+        x_out_history.append(results[ii][4])
+
+
+    for seed in range(1, 1 + num_trials):
+        # debug code
+        print('*' * 20)
+        print(f'Len: {mean_len_history[seed - 1]:.6f} ({std_len_history[seed - 1]:.10f})')
+    print(np.mean(cov_history))
+    # import pdb; pdb.set_trace()
+
+    f = open(f'Result_OBC{B}_{d}_{cov_a_str}.txt', 'a')
+    f.write('----->\n')
+    f.write(
+        f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)/num_trials}) \n')
+    f.write(f'\t d: {d} \t n: {n} \t B: {B} \t eta_0: {eta} \t alpha: {alpha} \t # Trials: {num_trials}\n')
+    f.write(f'\t True solution:           [')
+    for ii in range(d):
+        f.write(f'{x_star[ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t center in last trial:    [')
+    for ii in range(d):
+        f.write(f'{x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI UB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    f.write(f'\t CI LB in the last trial: [')
+    for ii in range(d):
+        f.write(f'{-len_history[-1][ii] + x_out_history[-1][ii]:.6f}, ')
+    f.write(']\n')
+    # f.write(f'\t Cover in the last trial: [')
+    # for ii in range(d):
+    #     f.write(f'{(cov_history)[-1][ii]:.0f}       , ')
+    # f.write(']\n')
+
+    f.close()
+
+    return
+
+def main_experiments_parallel_simple_rerun(d, n, eta, alpha, x_star, x_0, B, var_epsilon, cov_a_str, num_trials):
+    # mean and variance for generating a_i
+    # identity covariance matrix case
+    #
+    # linear regression model:
+    # b_i = x_star^\top a_i + \epsilon_i
+    if cov_a_str == 'identity':
+        mean_a = np.zeros(d)
+        cov_a = np.eye(d)
+    elif cov_a_str == 'toeplitz':
+        mean_a = np.zeros(d)
+        cov_a = np.eye(d)
+        r = 0.5
+        for ii in range(d):
+            for jj in range(d):
+                cov_a[ii, jj] = r ** np.abs(ii - jj)
+    elif cov_a_str == 'equi':
+        mean_a = np.zeros(d)
+        r = 0.2
+        cov_a = r * np.ones((d, d)) + (1 - r) * np.eye(d)
+
+    # SGD origial loop
+    # set random seed for original samples
+    results = Parallel(n_jobs=32)(delayed(main_loop_simple_rerun)(seed, x_star, x_0, n, B, eta, var_epsilon, mean_a, cov_a, alpha, num_trials) for seed in range(1, 1+num_trials))
+    mean_len_history = []
+    std_len_history = []
+    len_history = []
+    cov_history = []
+    x_out_history = []
+    for ii in range(num_trials):
+        mean_len_history.append(results[ii][0])
+        std_len_history.append(results[ii][1])
+        cov_history.append(results[ii][2])
+        len_history.append(results[ii][3])
+        x_out_history.append(results[ii][4])
+
+
+    for seed in range(1, 1 + num_trials):
+        # debug code
+        print('*' * 20)
+        print(f'Len: {mean_len_history[seed - 1]:.6f} ({std_len_history[seed - 1]:.10f})')
+    print(np.mean(cov_history))
+    # import pdb; pdb.set_trace()
+
+    f = open(f'Result_simplererun{B}_{d}_{cov_a_str}.txt', 'a')
     f.write('----->\n')
     f.write(
         f'\t Cov Rate: {np.mean(cov_history)} \t ({np.std(cov_history)}) \tAvg Len: {np.mean(len_history)} \t ({np.std(len_history)/num_trials}) \n')
